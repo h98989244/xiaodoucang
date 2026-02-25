@@ -10,7 +10,7 @@ export default function AdminSidebar() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/admin/login');
+    navigate('/admin');
   };
 
   return (

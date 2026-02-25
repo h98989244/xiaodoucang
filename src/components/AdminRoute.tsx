@@ -13,7 +13,7 @@ export default function AdminRoute({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || !isAdmin) return <Navigate to="/admin/login" replace />;
+  if (!user || !isAdmin) return <Navigate to="/admin" replace />;
 
   return <>{children}</>;
 }

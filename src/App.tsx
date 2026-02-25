@@ -36,7 +36,7 @@ export default function App() {
                 <Route path="/register" element={<Register />} />
 
                 {/* Admin Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
                 <Route path="/admin/settings" element={<AdminRoute><AdminSiteSettings /></AdminRoute>} />
 
