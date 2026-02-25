@@ -24,11 +24,21 @@ export default function ProductList() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  // Fetch categories
+  // Fetch categories that have active products
   useEffect(() => {
     (async () => {
+      // Get distinct categories from active products
+      const { data: activeProducts } = await supabase
+        .from('products')
+        .select('category')
+        .eq('status', 'active');
+
+      const activeCategories = new Set(activeProducts?.map(p => p.category).filter(Boolean));
+
       const { data } = await supabase.from('categories').select('id, name').order('name');
-      if (data) setCategories(data);
+      if (data) {
+        setCategories(data.filter(c => activeCategories.has(c.name)));
+      }
     })();
   }, []);
 
