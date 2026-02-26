@@ -143,18 +143,6 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Map */}
-        <div className="bg-[#1e293b] rounded-3xl overflow-hidden border border-gray-800 h-[400px]">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3615.002758178122!2d121.5622835150066!3d25.03396388397241!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442abb6da9c9e1f%3A0x1206bcf082fd10a6!2sTaipei%20101!5e0!3m2!1sen!2stw!4v1625041234567!5m2!1sen!2stw"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            title="Google Maps"
-          ></iframe>
-        </div>
       </div>
     </div>
   );
