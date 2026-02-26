@@ -22,9 +22,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2 text-xl font-bold">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">e</span>
-            </div>
+            <img src="/img/logo.png" alt="小豆倉" className="w-8 h-8 rounded-full object-cover" />
             {siteName}
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">

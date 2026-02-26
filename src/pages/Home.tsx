@@ -52,22 +52,13 @@ export default function Home() {
     <div className="bg-[#0f172a] min-h-screen text-white">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-gradient-to-r from-indigo-900 to-blue-900 rounded-[2rem] p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between min-h-[400px]">
-          <div className="z-10 max-w-lg mb-8 md:mb-0">
-            <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
-              輕鬆購點<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">就在小豆倉</span>
-            </h1>
-            <Link to="/products" className="inline-block bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 px-8 rounded-full text-lg transition-transform hover:scale-105 shadow-lg shadow-blue-500/30">
-              立即選購
-            </Link>
-          </div>
-
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-50 md:opacity-100 pointer-events-none">
-            <div className="absolute top-10 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-10 right-40 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
-          </div>
-        </div>
+        <Link to="/products" className="block">
+          <img
+            src="/img/test.png"
+            alt="小豆倉點卡商城 - 全網最全！熱門遊戲點數大集合"
+            className="w-full rounded-[2rem] object-cover shadow-lg hover:shadow-xl transition-shadow"
+          />
+        </Link>
       </section>
 
       {/* Featured Products */}
