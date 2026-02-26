@@ -2,9 +2,11 @@ import { useState, useEffect, type FormEvent } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import { supabase } from "../lib/supabase";
 import { useToast } from "../contexts/ToastContext";
+import { useSiteSettings } from "../contexts/SiteSettingsContext";
 
 export default function AdminSiteSettings() {
   const { showToast } = useToast();
+  const { refetch } = useSiteSettings();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -46,6 +48,7 @@ export default function AdminSiteSettings() {
       showToast('儲存失敗', 'error');
     } else {
       showToast('設定已儲存');
+      await refetch();
     }
   };
 
