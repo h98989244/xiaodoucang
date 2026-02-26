@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface SiteSettings {
@@ -8,6 +8,7 @@ interface SiteSettings {
   taxId: string;
   email: string;
   loading: boolean;
+  refetch: () => Promise<void>;
 }
 
 const defaults: SiteSettings = {
@@ -17,37 +18,40 @@ const defaults: SiteSettings = {
   taxId: '12345678',
   email: 'service@xiaodoucang.com',
   loading: true,
+  refetch: async () => {},
 };
 
 const SiteSettingsContext = createContext<SiteSettings>(defaults);
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings>(defaults);
+  const [settings, setSettings] = useState<Omit<SiteSettings, 'refetch'>>(defaults);
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('*')
-        .eq('id', 1)
-        .single();
-      if (data) {
-        setSettings({
-          siteName: data.site_name || defaults.siteName,
-          phone: data.phone || defaults.phone,
-          address: data.address || defaults.address,
-          taxId: data.tax_id || defaults.taxId,
-          email: data.email || defaults.email,
-          loading: false,
-        });
-      } else {
-        setSettings(prev => ({ ...prev, loading: false }));
-      }
-    })();
+  const fetchSettings = useCallback(async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .eq('id', 1)
+      .single();
+    if (data) {
+      setSettings({
+        siteName: data.site_name || defaults.siteName,
+        phone: data.phone || defaults.phone,
+        address: data.address || defaults.address,
+        taxId: data.tax_id || defaults.taxId,
+        email: data.email || defaults.email,
+        loading: false,
+      });
+    } else {
+      setSettings(prev => ({ ...prev, loading: false }));
+    }
   }, []);
 
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
   return (
-    <SiteSettingsContext.Provider value={settings}>
+    <SiteSettingsContext.Provider value={{ ...settings, refetch: fetchSettings }}>
       {children}
     </SiteSettingsContext.Provider>
   );
