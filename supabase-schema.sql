@@ -21,11 +21,11 @@ CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, email, name)
+  INSERT INTO public.profiles (id, email, name)
   VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'name');
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
@@ -102,6 +102,10 @@ CREATE TABLE orders (
   email TEXT,
   total NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
+  payment_method TEXT,
+  payment_status TEXT DEFAULT 'unpaid',
+  ecpay_trade_no TEXT,
+  payment_date TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -130,6 +134,71 @@ CREATE TABLE order_items (
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Readable with order" ON order_items FOR SELECT USING (true);
 CREATE POLICY "Insertable with order" ON order_items FOR INSERT WITH CHECK (true);
+
+-- 7b. Payment Logs
+CREATE TABLE payment_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id),
+  order_no TEXT NOT NULL,
+  action TEXT NOT NULL,
+  raw_data JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE payment_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins can read payment logs" ON payment_logs FOR SELECT USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);
+CREATE POLICY "Service can insert payment logs" ON payment_logs FOR INSERT WITH CHECK (true);
+
+-- 7c. Checkout Order Function (atomic stock validation + order creation)
+CREATE OR REPLACE FUNCTION checkout_create_order(
+  p_items JSONB,
+  p_order_no TEXT,
+  p_user_id UUID,
+  p_email TEXT,
+  p_total NUMERIC,
+  p_payment_method TEXT
+) RETURNS UUID AS $$
+DECLARE
+  v_order_id UUID;
+  v_item JSONB;
+  v_available INT;
+BEGIN
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+  LOOP
+    SELECT stock INTO v_available
+    FROM product_variants
+    WHERE id = (v_item->>'variant_id')::UUID
+    FOR UPDATE;
+
+    IF v_available < (v_item->>'quantity')::INT THEN
+      RAISE EXCEPTION 'Insufficient stock for variant %', v_item->>'variant_id';
+    END IF;
+
+    UPDATE product_variants
+    SET stock = stock - (v_item->>'quantity')::INT
+    WHERE id = (v_item->>'variant_id')::UUID;
+  END LOOP;
+
+  INSERT INTO orders (order_no, user_id, email, total, status, payment_status, payment_method)
+  VALUES (p_order_no, p_user_id, p_email, p_total, 'pending', 'unpaid', p_payment_method)
+  RETURNING id INTO v_order_id;
+
+  INSERT INTO order_items (order_id, product_id, variant_id, product_name, variant_label, price, quantity)
+  SELECT
+    v_order_id,
+    (item->>'product_id')::UUID,
+    (item->>'variant_id')::UUID,
+    item->>'product_name',
+    item->>'variant_label',
+    (item->>'price')::NUMERIC,
+    (item->>'quantity')::INT
+  FROM jsonb_array_elements(p_items) AS item;
+
+  RETURN v_order_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 8. Site Settings
 CREATE TABLE site_settings (

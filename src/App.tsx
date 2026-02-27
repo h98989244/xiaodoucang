@@ -22,6 +22,8 @@ import Member from "./pages/Member";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import About from "./pages/About";
+import Checkout from "./pages/Checkout";
+import CheckoutResult from "./pages/CheckoutResult";
 
 export default function App() {
   return (
@@ -56,6 +58,8 @@ export default function App() {
                           <Route path="/privacy" element={<Privacy />} />
                           <Route path="/member" element={<ProtectedRoute><Member /></ProtectedRoute>} />
                           <Route path="/cart" element={<Cart />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/checkout/result" element={<CheckoutResult />} />
                           <Route path="/orders" element={<Orders />} />
                           <Route path="/about" element={<About />} />
                         </Routes>

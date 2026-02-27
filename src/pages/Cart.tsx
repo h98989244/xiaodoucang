@@ -1,58 +1,14 @@
 import { Trash2, Minus, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
-import { useAuth } from "../contexts/AuthContext";
-import { useToast } from "../contexts/ToastContext";
-import { supabase } from "../lib/supabase";
-import { useState } from "react";
 
 export default function Cart() {
-  const { items, total, updateQuantity, removeItem, clearCart } = useCart();
-  const { user } = useAuth();
-  const { showToast } = useToast();
+  const { items, total, updateQuantity, removeItem } = useCart();
   const navigate = useNavigate();
-  const [checkingOut, setCheckingOut] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (items.length === 0) return;
-    setCheckingOut(true);
-
-    const orderNo = `ORD-${Date.now().toString(36).toUpperCase()}`;
-
-    const { data: order, error } = await supabase
-      .from('orders')
-      .insert({
-        order_no: orderNo,
-        user_id: user?.id || null,
-        email: user?.email || '',
-        total,
-        status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (error || !order) {
-      showToast('結帳失敗，請稍後再試', 'error');
-      setCheckingOut(false);
-      return;
-    }
-
-    const orderItems = items.map(item => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      variant_id: item.variant_id,
-      product_name: item.product_name,
-      variant_label: item.variant_label,
-      price: item.price,
-      quantity: item.quantity,
-    }));
-
-    await supabase.from('order_items').insert(orderItems);
-    await clearCart();
-
-    showToast(`訂單 ${orderNo} 已成立！`);
-    setCheckingOut(false);
-    navigate('/orders');
+    navigate('/checkout');
   };
 
   return (
@@ -117,10 +73,9 @@ export default function Cart() {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  disabled={checkingOut}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-600/20"
                 >
-                  {checkingOut ? '處理中...' : '前往結帳'}
+                  前往結帳
                 </button>
                 <Link to="/products" className="block text-center mt-4 text-sm text-gray-400 hover:text-white transition-colors">
                   繼續購物

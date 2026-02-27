@@ -21,7 +21,7 @@ interface Order {
 }
 
 const statusMap: Record<string, { label: string; className: string }> = {
-  pending: { label: '處理中', className: 'bg-yellow-500/20 text-yellow-400' },
+  pending: { label: '待付款', className: 'bg-yellow-500/20 text-yellow-400' },
   completed: { label: '已完成', className: 'bg-emerald-500/20 text-emerald-400' },
   cancelled: { label: '已取消', className: 'bg-red-500/20 text-red-400' },
 };
