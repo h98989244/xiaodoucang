@@ -22,3 +22,7 @@ frontend:
       headers:
         - key: Cache-Control
           value: 'no-cache'
+customRules:
+  - source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|avif)$)([^.]+$)/>'
+    target: /index.html
+    status: '200'
